@@ -2,11 +2,13 @@ var app = new Vue({
     el: '#app',
     data: {
         games: [],
+        player: [],
         playersData: [],
         username: "",
         password: "",
         firstname: "",
         lastname: "",
+//        location: "",
     },
     methods: {
         getDataByPlayerOrdered(){
@@ -65,45 +67,61 @@ var app = new Vue({
             console.log(this.playersData);
         },
         login(){
-            $.post("/api/login", { username: this.username, password: this.password }).done(function() {
-            console.log("logged in!");
-            alert("You are logged!");
+            $.post("/api/login", { username: this.username, password: this.password })
+            .done(function() {
+                request();
+                console.log("logged in!");
+                alert("You are logged!");
+                app.username = "";
+                app.password = "";
             })
-
-            this.username = "";
-            this.password = "";
+            .fail(function(){
+                alert("User name or password incorrect")
+            })
         },
         logout(){
             $.post("/api/logout").done(function() {
-            console.log("logged out");
-            alert("You are dislogged")
+                console.log("logged out");
+                alert("You are dislogged");
+                app.player = null;
             })
         },
         signup(){
             $.post("/api/players", { firstname: this.firstname, lastname: this.lastname,
             username: this.username, password: this.password }).done(function() {
                 console.log("signed in!");
-                alert("Signed succesfully. Now, you can log in to play!");
+                alert("Signed succesfully. Let´s go play!");
                 app.login();
+                app.firstname = "";
+                app.lastname = "";
             }).fail(function(error) {
                 console.log(error);
+                alert("You must complete all fields");
             })
-
-            this.firstname = "";
-            this.lastname = "";
+        },
+        hideLabels(){
+            if(this.player != null){
+                document.getElementById("login-form").classList.add("d-none");
+            }
+        },
+        enterGame(gamePlayerID){
+            location.href = 'http://localhost:8080/web/game_view.html?gp='+gamePlayerID;
         },
     },
 });
 
+function request(){
+    fetch("http://localhost:8080/api/games")
+        .then((Response) => {
+            return Response.json();
+        })
+        .then((myJson) => {
 
-fetch("http://localhost:8080/api/games")
-    .then((Response) => {
-        return Response.json();
-    })
-    .then((myJson) => {
-
-        console.log(myJson);
-        app.games = myJson;
-        app.getDataByPlayerOrdered();
-    })
-
+            console.log(myJson);
+            app.games = myJson.games;
+            app.player = myJson.player;
+            app.getDataByPlayerOrdered();
+            app.hideLabels();
+        })
+}
+request();

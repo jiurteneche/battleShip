@@ -6,12 +6,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-//Y ESTA CLASE ES LA QUE AUTORIZA A LOS USUARIOS AUTENTICADOS (es decir, les da los accesos a las distintas url)
+
+//Y aquí sólo le indicamos a Spring qué tiene que revisar por cada petición que llega (y, en base a ello, Spring autoriza o no)
 @Configuration
 @EnableWebSecurity
 class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -31,6 +31,7 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.logout().logoutUrl("/api/logout");
 
+        http.headers().frameOptions().disable();
 
 
         // turn off checking for CSRF tokens

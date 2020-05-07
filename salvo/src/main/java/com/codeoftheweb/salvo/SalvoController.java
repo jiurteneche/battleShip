@@ -3,14 +3,13 @@ package com.codeoftheweb.salvo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-
 import static java.util.stream.Collectors.toList;
 
 @RestController
@@ -30,11 +29,16 @@ public class SalvoController {
     PasswordEncoder passwordEncoder;
 
     @RequestMapping("/games")
-    public List<Map<String, Object>> getAll() {
-        return gameRepository.findAll()
-                .stream()
-                .map(game -> makeGameDTO(game))
-                .collect(toList());
+    public Map<String, Object> getAll(Authentication authentication) {
+        Map<String, Object> dto = new LinkedHashMap<>();
+        if(!isGuest(authentication)){
+            dto.put("player", makePlayerDTO(playerRepository.findByUserNameIgnoreCase(authentication.getName())));
+        } else{
+            dto.put("player", null);
+        }
+        dto.put("games", gameRepository.findAll().stream().map(game -> makeGameDTO(game)).collect(toList()));
+
+        return dto;
     }
 
     @RequestMapping("/game_view/{gamePlayerId}")
@@ -100,6 +104,13 @@ public class SalvoController {
             dto.put("userName", player.getUserName());
             return dto;
         }
+
+
+
+        private boolean isGuest(Authentication authentication) {
+        return authentication == null || authentication instanceof AnonymousAuthenticationToken;
+        }
+
     //---------------------------------------------------------------------------------------------------------------------------------
 
 
