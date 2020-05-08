@@ -29,7 +29,7 @@ public class SalvoController {
     PasswordEncoder passwordEncoder;
 
     @RequestMapping("/games")
-    public Map<String, Object> getAll(Authentication authentication) {
+    public Map<String, Object> getGames(Authentication authentication) {
         Map<String, Object> dto = new LinkedHashMap<>();
         if(!isGuest(authentication)){
             dto.put("player", makePlayerDTO(playerRepository.findByUserNameIgnoreCase(authentication.getName())));
@@ -42,14 +42,22 @@ public class SalvoController {
     }
 
     @RequestMapping("/game_view/{gamePlayerId}")
-    public Map<String, Object> gamePlayerId (@PathVariable Long gamePlayerId){
-        GamePlayer gp = gamePlayerRepository.findById(gamePlayerId).orElse(null);
-
-        if(gp != null){
-            return this.makeGameViewDTO(gp);
+    public ResponseEntity <Map<String, Object>> getGameView (@PathVariable Long gamePlayerId, Authentication authentication){
+        ResponseEntity <Map<String, Object>> response;
+        if(isGuest(authentication)){
+            response = new ResponseEntity<>(makeMap("Error", "You must be logged in first"), HttpStatus.UNAUTHORIZED);
         } else{
-            return null;
+            GamePlayer gp = gamePlayerRepository.findById(gamePlayerId).orElse(null);
+            Player player = playerRepository.findByUserNameIgnoreCase(authentication.getName());
+            if(gp == null){
+                response = new ResponseEntity<>(makeMap("Error", "No such game"), HttpStatus.NOT_FOUND);
+            }else if(gp.getPlayer().getId() != player.getId()){
+                response = new ResponseEntity<>(makeMap("Error", "This is not your game"), HttpStatus.UNAUTHORIZED);
+            }else {
+                response = new ResponseEntity<>(this.makeGameViewDTO(gp), HttpStatus.OK);
+            }
         }
+        return response;
     }
 
     //Este @RequestMapping del tipo POST sirve para darle acceso a los usuarios a la base de datos (y, de esa forma, puedan crear sus usuarios)
@@ -70,6 +78,26 @@ public class SalvoController {
         }
         return response;
     }
+
+    //Este método es equivalente a hacer un @RequestMapping del tipo post como el de arriba
+    //Sirve para que un usuario logueado pueda crear un game que deje una vacante para que se una otro player
+    //Pero hay que tener en cuenta que cuando crea un game, crea, a su vez, un gamePlayer. Faltaría entonces que otro jugador (que va a
+    @PostMapping("/games")
+    public ResponseEntity<Map<String, Object>> createGame(Authentication authentication){
+        ResponseEntity<Map<String, Object>> response;
+        if(isGuest(authentication)){
+            response = new ResponseEntity<>(makeMap("Error", "You must be logged to create a game"), HttpStatus.FORBIDDEN);
+        }else{
+            Game newGame = new Game();
+            Player player = playerRepository.findByUserNameIgnoreCase(authentication.getName());
+            GamePlayer newGamePlayer = new GamePlayer(newGame, player);
+            gameRepository.save(newGame);
+            gamePlayerRepository.save(newGamePlayer);
+            response = new ResponseEntity<>(makeMap("GpId", newGamePlayer.getId()), HttpStatus.CREATED);
+        }
+        return response;
+    }
+
 
 
 
@@ -106,7 +134,7 @@ public class SalvoController {
         }
 
 
-
+        //Esta función también la uso en el @RequestMapping("/game_view/{gamePlayerId}") y para el @PostMapping("/games") también
         private boolean isGuest(Authentication authentication) {
         return authentication == null || authentication instanceof AnonymousAuthenticationToken;
         }
@@ -151,7 +179,7 @@ public class SalvoController {
 
 
 
-    //FUNCIÓN NECESARIA PARA HACER EL @RequestMapping("/players")--------------------------------------------------------------------------
+    //FUNCIÓN NECESARIA PARA HACER EL @RequestMapping("/players") y también para el @RequestMapping("/game_view/{gamePlayerId}") y también para el @PostMapping("/games")-------------
         private Map<String, Object> makeMap(String key, Object value){
             Map<String, Object> map = new HashMap<>();
             map.put(key, value);

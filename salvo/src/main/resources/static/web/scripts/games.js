@@ -80,7 +80,8 @@ var app = new Vue({
             })
         },
         logout(){
-            $.post("/api/logout").done(function() {
+            $.post("/api/logout")
+            .done(function() {
                 console.log("logged out");
                 alert("You are dislogged");
                 app.player = null;
@@ -88,24 +89,32 @@ var app = new Vue({
         },
         signup(){
             $.post("/api/players", { firstname: this.firstname, lastname: this.lastname,
-            username: this.username, password: this.password }).done(function() {
+            username: this.username, password: this.password })
+            .done(function() {
                 console.log("signed in!");
                 alert("Signed succesfully. Let´s go play!");
                 app.login();
                 app.firstname = "";
                 app.lastname = "";
-            }).fail(function(error) {
+            })
+            .fail(function(error) {
                 console.log(error);
                 alert("You must complete all fields");
             })
         },
-        hideLabels(){
-            if(this.player != null){
-                document.getElementById("login-form").classList.add("d-none");
-            }
-        },
         enterGame(gamePlayerID){
             location.href = 'http://localhost:8080/web/game_view.html?gp='+gamePlayerID;
+        },
+        createNewGame(){
+            $.post("/api/games")
+            .done(function(Response){
+                console.log("Game created successfully");
+                location.href = 'http://localhost:8080/web/game_view.html?gp='+Response.GpId;
+            })
+            .fail(function(error){
+                console.log(error)
+                alert("You must be logged to create a game")
+            })
         },
     },
 });
@@ -116,12 +125,10 @@ function request(){
             return Response.json();
         })
         .then((myJson) => {
-
             console.log(myJson);
             app.games = myJson.games;
             app.player = myJson.player;
             app.getDataByPlayerOrdered();
-            app.hideLabels();
         })
 }
 request();
