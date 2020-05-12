@@ -28,7 +28,7 @@ public class SalvoController {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    @RequestMapping("/games")
+    @GetMapping("/games")
     public Map<String, Object> getGames(Authentication authentication) {
         Map<String, Object> dto = new LinkedHashMap<>();
         if(!isGuest(authentication)){
@@ -41,7 +41,7 @@ public class SalvoController {
         return dto;
     }
 
-    @RequestMapping("/game_view/{gamePlayerId}")
+    @GetMapping("/game_view/{gamePlayerId}")
     public ResponseEntity <Map<String, Object>> getGameView (@PathVariable Long gamePlayerId, Authentication authentication){
         ResponseEntity <Map<String, Object>> response;
         if(isGuest(authentication)){
@@ -63,7 +63,7 @@ public class SalvoController {
     //Este @RequestMapping del tipo POST sirve para darle acceso a los usuarios a la base de datos (y, de esa forma, puedan crear sus usuarios)
     //Este método devuelve ResponseEntity que no son otra cosa que objetos que muestran un código de error o de éxito en el front
     //cuando el usuario quiere crear su propio usuario
-    @RequestMapping(path = "/players", method = RequestMethod.POST)
+    @PostMapping("/players")
     public ResponseEntity<Map<String, Object>> createPlayer(@RequestParam String firstname, @RequestParam String lastname,
                                                           @RequestParam String username, @RequestParam String password){
         ResponseEntity<Map<String, Object>> response;
@@ -98,11 +98,54 @@ public class SalvoController {
         return response;
     }
 
+    //Este método sirve para que un player se pueda joinear a un game que le falte un player para comenzar
+    @PostMapping("games/{gameId}/players")
+    public ResponseEntity<Map<String, Object>> joingGame (Authentication authentication, @PathVariable Long gameId){
+        ResponseEntity<Map<String, Object>> response;
+        if(isGuest(authentication)){
+            response = new ResponseEntity<>(makeMap("Error", "You must be logged to join a game"), HttpStatus.FORBIDDEN);
+        }else{
+            Game game = gameRepository.findById(gameId).orElse(null);
+            if(game == null){
+                response = new ResponseEntity<>(makeMap("Error", "No such game"), HttpStatus.NOT_FOUND);
+            }else if (game.getGamePlayers().size() > 1){
+                response = new ResponseEntity<>(makeMap("Error", "The game is full"), HttpStatus.FORBIDDEN);
+            }else{
+                Player player = playerRepository.findByUserNameIgnoreCase(authentication.getName());
+                if(game.getGamePlayers().stream().anyMatch(gp -> gp.getPlayer().getId() == player.getId())){
+                    response = new ResponseEntity<>(makeMap("Error", "You can´t play against yourself"), HttpStatus.FORBIDDEN);
+                }else{
+                    GamePlayer newGamePlayer = gamePlayerRepository.save(new GamePlayer(game, player));
+                    response = new ResponseEntity<>(makeMap("GpId", newGamePlayer.getId()), HttpStatus.CREATED);
+                }
+            }
+        }
+        return response;
+    }
 
 
 
 
-    //FUNCIONES NECESARIAS PARA HACER EL @RequestMapping("/games") ---------------------------------------------------------------------
+    //Esta función isGuest la uso en todos los Mapping anteriores porque me sirve para saber si el usuario que está haciendo la petición a tal o cual url
+    //está logueado o no (guest = invitado)
+    private boolean isGuest(Authentication authentication) {
+        return authentication == null || authentication instanceof AnonymousAuthenticationToken;
+    }
+
+
+    //Esta función la uso en todos los Mapping anteriores que devuelven una ResponseEntity<Map<String, Object>> porque justamente lo que hace es
+    //armar la estructura de ese Map<String, Object> que luego se va a rellenar con los distintos tipos de respuesta posibles
+    private Map<String, Object> makeMap(String key, Object value){
+        Map<String, Object> map = new HashMap<>();
+        map.put(key, value);
+        return map;
+    }
+    //------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    //FUNCIONES NECESARIAS PARA HACER LOS DTO DE @GetMapping("/games") ---------------------------------------------------------------------
         private Map<String, Object> makeGameDTO(Game game) {
             Map<String, Object> dto = new LinkedHashMap<String, Object>();
             dto.put("id", game.getId());
@@ -132,19 +175,12 @@ public class SalvoController {
             dto.put("userName", player.getUserName());
             return dto;
         }
-
-
-        //Esta función también la uso en el @RequestMapping("/game_view/{gamePlayerId}") y para el @PostMapping("/games") también
-        private boolean isGuest(Authentication authentication) {
-        return authentication == null || authentication instanceof AnonymousAuthenticationToken;
-        }
-
     //---------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
-    //FUNCIONES NECESARIAS PARA HACER EL @RequestMapping("/game_view/{gamePlayerId}") ---------------------------------------------------------------------
+    //FUNCIONES NECESARIAS PARA HACER LOS DTO DE @GetMapping("/game_view/{gamePlayerId}") ---------------------------------------------------------------------
         private Map<String, Object> makeGameViewDTO(GamePlayer gamePlayer){
             Map<String, Object> dto = new LinkedHashMap<>();
             dto.put("id", gamePlayer.getGame().getId());
@@ -179,13 +215,7 @@ public class SalvoController {
 
 
 
-    //FUNCIÓN NECESARIA PARA HACER EL @RequestMapping("/players") y también para el @RequestMapping("/game_view/{gamePlayerId}") y también para el @PostMapping("/games")-------------
-        private Map<String, Object> makeMap(String key, Object value){
-            Map<String, Object> map = new HashMap<>();
-            map.put(key, value);
-            return map;
-        }
-    //-------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 

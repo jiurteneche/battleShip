@@ -102,7 +102,7 @@ var app = new Vue({
                 alert("You must complete all fields");
             })
         },
-        enterGame(gamePlayerID){
+        backToGame(gamePlayerID){
             location.href = 'http://localhost:8080/web/game_view.html?gp='+gamePlayerID;
         },
         createNewGame(){
@@ -112,8 +112,18 @@ var app = new Vue({
                 location.href = 'http://localhost:8080/web/game_view.html?gp='+Response.GpId;
             })
             .fail(function(error){
-                console.log(error)
-                alert("You must be logged to create a game")
+                console.log(error);
+                alert("You must be logged to create a game");
+            })
+        },
+        joinGame(gameId){
+            $.post("/api/games/" + gameId + "/players")
+            .done(function(Response){
+                console.log("Joined successfully")
+                location.href = 'http://localhost:8080/web/game_view.html?gp='+Response.GpId;
+            })
+            .fail(function(error){
+                console.log(error);
             })
         },
     },

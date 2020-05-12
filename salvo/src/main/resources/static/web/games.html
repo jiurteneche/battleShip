@@ -41,11 +41,14 @@
         <h3>Game List</h3>
         <ol>
             <li v-for="game in games"> {{game.creationDate}}
+
                 <ol>
                     <li v-for="gamePlayer in game.gamePlayers"> {{gamePlayer.player.userName}}
                         <button v-if="player != null && gamePlayer.player.userName == player.userName"
-                                v-on:click="enterGame(gamePlayer.id)">
-                            Enter Game</button>
+                                v-on:click="backToGame(gamePlayer.id)">
+                            Back to Game</button>
+                        <button v-if="player != null && game.gamePlayers.length == 1 && gamePlayer.player.id != player.id"
+                                v-on:click="joinGame(game.id)">Join Game</button>
                     </li>
                 </ol>
             </li>
