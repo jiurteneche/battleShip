@@ -19,21 +19,27 @@
         <span>{{otherPlayer ? otherPlayer.userName  : ""}}</span>
     </div>
 
+    <!--ARREGLAR DESPUES EL TEMA DEL CLASS="COL" / ESTO LO HICE PARA PODER ARMAR EL FRONT-->
     <div class="row">
-        <h3>Game Grid</h3>
-        <table class="table table-bordered">
-            <thead>
-            <tr>
-                <th v-for="number in numbers">{{number}}</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="letter in letters">
-                <td>{{letter}}</td>
-                <td v-bind:id="letter+number" v-for="number in 10">{{ }}</td>
-            </tr>
-            </tbody>
-        </table>
+        <div class="col-8">
+            <h3>Game Grid</h3>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th v-for="number in numbers">{{number}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="letter in letters">
+                    <td>{{letter}}</td>
+                    <td v-bind:id="letter+number" v-for="number in 10">{{ }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-4">
+            Choose your ships locations
+        </div>
     </div>
 
     <div class="row">
