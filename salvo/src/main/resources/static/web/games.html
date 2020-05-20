@@ -20,9 +20,9 @@
             <form v-if="player == null" id="login-form">
                 <label>User Name: <input type="text" name="username" v-model:value="username" required></label>
                 <label>Password: <input type="password" name="password" v-model:value="password" required></label>
+                <button type="button" v-on:click="login()">Log In</button>
                 <label>(Only to sign up) Name: <input type="text" name="name" v-model:value="firstname"></label>
                 <label>(Only to sign up) Last Name: <input type="text" name="lastname" v-model:value="lastname"></label>
-                <button type="button" v-on:click="login()">Log In</button>
                 <button type="button" v-on:click="signup()">Sign Up</button>
             </form>
         </div>

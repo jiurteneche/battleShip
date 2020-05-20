@@ -128,7 +128,7 @@ public class SalvoController {
     public ResponseEntity<Map<String, Object>> addShips(Authentication authentication, @PathVariable Long gamePlayerId, @RequestBody List<Ship> ships){
         ResponseEntity<Map<String, Object>> response;
         if(isGuest(authentication)){
-            response = new ResponseEntity<>(makeMap("Error", "You must bue logged first"), HttpStatus.UNAUTHORIZED);
+            response = new ResponseEntity<>(makeMap("Error", "You must be logged first"), HttpStatus.UNAUTHORIZED);
         }else{
             GamePlayer gamePlayer = gamePlayerRepository.findById(gamePlayerId).orElse(null);
             Player player = playerRepository.findByUserNameIgnoreCase(authentication.getName());
@@ -159,6 +159,34 @@ public class SalvoController {
         return response;
     }
 
+
+    @PostMapping("/games/players/{gamePlayerId}/salvoes")
+    public ResponseEntity<Map<String, Object>> addSalvo(Authentication authentication, @PathVariable Long gamePlayerId, @RequestBody List<String> shots){
+        ResponseEntity<Map<String, Object>> response;
+        if(isGuest(authentication)){
+            response = new ResponseEntity<>(makeMap("Error", "You must be logged first"), HttpStatus.UNAUTHORIZED);
+        }else{
+            GamePlayer gamePlayer = gamePlayerRepository.findById(gamePlayerId).orElse(null);
+            Player player = playerRepository.findByUserNameIgnoreCase(authentication.getName());
+            if(gamePlayer == null){
+                response = new ResponseEntity<>(makeMap("Error", "No such game"), HttpStatus.NOT_FOUND);
+            }else if(gamePlayer.getPlayer().getId() != player.getId()) {
+                response = new ResponseEntity<>(makeMap("Error", "This is not your game"), HttpStatus.UNAUTHORIZED);
+            }else if(shots.size() != 5){
+                response = new ResponseEntity<>(makeMap("Error", "Wrong number of shots"), HttpStatus.FORBIDDEN);
+            }else{
+                int turn = gamePlayer.getSalvoes().size() + 1;
+
+                Salvo salvo = new Salvo(turn, shots, gamePlayer);
+                gamePlayer.addSalvo(salvo);
+
+                gamePlayerRepository.save(gamePlayer);
+
+                response = new ResponseEntity<>(makeMap("Success", "Salvo added"), HttpStatus.CREATED);
+            }
+        }
+        return response;
+    }
 
 
 
@@ -208,32 +236,31 @@ public class SalvoController {
 
         boolean isVertical = cells.get(0).charAt(0) != cells.get(1).charAt(0);
 
-        int i;
-
-        for (i=0 ; i < cells.size(); i++) {
+        for (int i=0 ; i < cells.size(); i++) {
             if (i < cells.size() - 1) {
-                char yChar = cells.get(i).substring(0, 1).charAt(0);
-                char compareChar = cells.get(i + 1).substring(0, 1).charAt(0);
-                if (compareChar - yChar != 1) {
-                    return true;
-                }
-            } else {
-                Integer xInt = Integer.parseInt(cells.get(i).substring(1));
-                Integer compareInt = Integer.parseInt(cells.get(i + 1).substring(1));
-                if (compareInt - xInt != 1) {
-                    return true;
-                }
+                if(isVertical){
+                    char yChar = cells.get(i).substring(0, 1).charAt(0);
+                    char compareChar = cells.get(i + 1).substring(0, 1).charAt(0);
+                    if (compareChar - yChar != 1) {
+                        return true;
+                    }
+                } else {
+                        Integer xInt = Integer.parseInt(cells.get(i).substring(1));
+                        Integer compareInt = Integer.parseInt(cells.get(i + 1).substring(1));
+                        if (compareInt - xInt != 1) {
+                            return true;
+                        }
+                    }
             }
-        }
-
-        for (int j = i + 1; j < cells.size(); j++) {
-            if (isVertical) {
-                if (!cells.get(i).substring(1).equals(cells.get(j).substring(1))) {
-                    return true;
-                }
-            } else {
-                if (!cells.get(i).substring(0, 1).equals(cells.get(j).substring(0, 1))) {
-                    return true;
+            for (int j = i + 1; j < cells.size(); j++) {
+                if (isVertical) {
+                    if (!cells.get(i).substring(1).equals(cells.get(j).substring(1))) {
+                        return true;
+                    }
+                } else {
+                    if (!cells.get(i).substring(0, 1).equals(cells.get(j).substring(0, 1))) {
+                        return true;
+                    }
                 }
             }
         }

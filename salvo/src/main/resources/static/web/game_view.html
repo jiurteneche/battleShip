@@ -6,6 +6,9 @@
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="styles/game_view.css">
+
 </head>
 
 <body>
@@ -19,9 +22,11 @@
         <span>{{otherPlayer ? otherPlayer.userName  : ""}}</span>
     </div>
 
-    <!--ARREGLAR DESPUES EL TEMA DEL CLASS="COL" / ESTO LO HICE PARA PODER ARMAR EL FRONT-->
+
+
     <div class="row">
-        <div class="col-8">
+
+        <div class="col-5" id="game-grid">
             <h3>Game Grid</h3>
             <table class="table table-bordered">
                 <thead>
@@ -32,41 +37,68 @@
                 <tbody>
                 <tr v-for="letter in letters">
                     <td>{{letter}}</td>
-                    <td v-bind:id="letter+number" v-for="number in 10">{{ }}</td>
+                    <td v-bind:id="letter+number" v-for="number in 10" v-on:click="addShips(letter+number)">{{ }}</td>
                 </tr>
                 </tbody>
             </table>
+
+            <div id="add-ships" v-show="ships.length == 0"> 
+                <div>
+                    Choose ships
+                    <select id="ships" v-model:value="shipType">
+                        <option value="aircraft" selected>Aircraft Carrier</option>
+                        <option value="battleship">Battleship</option>
+                        <option value="destroyer">Destroyer</option>
+                        <option value="submarine">Submarine</option>
+                        <option value="patrol">Patrol Boat</option>
+                    </select>
+                    Orientation
+                    <label><input type="radio" name="orientation" value="vertical" v-model="shipOrientation" checked>Vertical</label>
+                    <label><input type="radio" name="orientation" value="horizontal" v-model="shipOrientation">Horizontal</label>
+                </div>
+                <div>
+                    <button v-on:click="sendShips()">SEND</button>
+                </div>
+            </div>
+
         </div>
-        <div class="col-4">
-            Choose your ships locations
+
+        <div class="col-5" id="salvoes-grid">
+            <h3>Your Salvoes</h3>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th v-for="num in numbers">{{num}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="let in letters">
+                    <td>{{let}}</td>
+                    <td v-bind:id="let+num + 'S'" v-for="num in 10" v-on:click="selectTdToFire(let+num + 'S')">{{ }}</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div id="add-salvo" class="col-5">
+                <button v-on:click="sendSalva()">FIRE!</button>
+            </div>
+
         </div>
+        
     </div>
 
     <div class="row">
-        <h3>Your Salvoes</h3>
-        <table class="table table-bordered">
-            <thead>
-            <tr>
-                <th v-for="num in numbers">{{num}}</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="let in letters">
-                <td>{{let}}</td>
-                <td v-bind:id="let+num + 'S'" v-for="num in 10">{{ }}</td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
 
+
+    </div>
 
 </div>
 
 
 <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
-<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+<script src="https://code.jquery.com/jquery-3.5.0.min.js"
+        integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ="
         crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
         integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
@@ -76,5 +108,6 @@
         crossorigin="anonymous"></script>
 
 <script src="scripts/game_view.js"></script>
+
 </body>
 </html>
