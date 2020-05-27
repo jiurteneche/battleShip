@@ -63,8 +63,6 @@ var app = new Vue({
                             }
                             return 0;
                         })
-
-            console.log(this.playersData);
         },
         login(){
             $.post("/api/login", { username: this.username, password: this.password })
@@ -135,7 +133,6 @@ function request(){
             return Response.json();
         })
         .then((myJson) => {
-            console.log(myJson);
             app.games = myJson.games;
             app.player = myJson.player;
             app.getDataByPlayerOrdered();

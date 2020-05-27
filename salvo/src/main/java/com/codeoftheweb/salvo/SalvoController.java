@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -351,6 +352,27 @@ public class SalvoController {
             dto.put("turnNumber", salvo.getTurnNumber());
             dto.put("salvoLocations", salvo.getSalvoLocations());
             dto.put("playerID", salvo.getGamePlayer().getPlayer().getId());
+
+            GamePlayer opponent = salvo.getGamePlayer().getOpponent();
+
+            if(opponent != null){
+
+                Set<Ship> enemyShips = opponent.getShips();
+
+                dto.put("hits", salvo.getHits(salvo.getSalvoLocations(), enemyShips));
+
+                Set<Salvo> mySalvoes = salvo.getGamePlayer()
+                                            .getSalvoes()
+                                            .stream()
+                                            .filter(sal -> sal.getTurnNumber() <= salvo.getTurnNumber())
+                                            .collect(Collectors.toSet());
+
+                dto.put("sunken", salvo.getSunkenShips(mySalvoes, enemyShips).stream().map(ship -> this.makeShipDTO(ship)));
+
+            } else {
+                dto.put("hits", new ArrayList<>());
+                dto.put("sunken", new ArrayList<>());
+            }
 
             return dto;
         }

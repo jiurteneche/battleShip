@@ -68,5 +68,12 @@ public class GamePlayer {
 
     public Score getScore(){ return this.player.getScoreByGame(this.game); }
 
+    public GamePlayer getOpponent(){
+        return this.getGame().getGamePlayers()
+            .stream().filter(gp -> gp.getId() != this.getId())
+            .findFirst()
+            .orElse(null);
+    }
+
 }
 

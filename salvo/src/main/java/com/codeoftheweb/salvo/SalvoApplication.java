@@ -74,33 +74,33 @@ public class SalvoApplication {
             ships.save(ship1);
             Ship ship2 = new Ship ("Destroyer", Arrays.asList("H1","I1","J1"), gamePlayer1);
             ships.save(ship2);
-            Ship ship3 = new Ship ("Aircraft Carrier", Arrays.asList("B1","B2","B3","B4","B5"), gamePlayer1);
+            Ship ship3 = new Ship ("Aircraft-Carrier", Arrays.asList("B1","B2","B3","B4","B5"), gamePlayer1);
             ships.save(ship3);
             Ship ship4 = new Ship ("Battleship", Arrays.asList("E2","E3","E4","E5"), gamePlayer1);
             ships.save(ship4);
-            Ship ship21 = new Ship ("Patrol Boat", Arrays.asList("J5", "J6"), gamePlayer1);
+            Ship ship21 = new Ship ("Patrol-Boat", Arrays.asList("J5", "J6"), gamePlayer1);
             ships.save(ship21);
 
             Ship ship5 = new Ship ("Destroyer", Arrays.asList("C1","C2","C3"), gamePlayer2);
             ships.save(ship5);
             Ship ship6 = new Ship ("Submarine", Arrays.asList("D1","E1","F1"), gamePlayer2);
             ships.save(ship6);
-            Ship ship7 = new Ship ("Aircraft Carrier", Arrays.asList("G1","G2","G3","G4","G5"), gamePlayer2);
+            Ship ship7 = new Ship ("Aircraft-Carrier", Arrays.asList("G1","G2","G3","G4","G5"), gamePlayer2);
             ships.save(ship7);
             Ship ship8 = new Ship ("Battleship", Arrays.asList("J5","J6","J7","J8"), gamePlayer2);
             ships.save(ship8);
-            Ship ship22 = new Ship ("Patrol Boat", Arrays.asList("A5", "A6"), gamePlayer2);
+            Ship ship22 = new Ship ("Patrol-Boat", Arrays.asList("A5", "A6"), gamePlayer2);
             ships.save(ship22);
 
             Ship ship9 = new Ship ("Destroyer", Arrays.asList("H1","I1","J1"), gamePlayer3);
             ships.save(ship9);
             Ship ship10 = new Ship ("Submarine", Arrays.asList("D1","E1","F1"), gamePlayer3);
             ships.save(ship10);
-            Ship ship11 = new Ship ("Aircraft Carrier", Arrays.asList("G1","G2","G3","G4","G5"), gamePlayer3);
+            Ship ship11 = new Ship ("Aircraft-Carrier", Arrays.asList("G1","G2","G3","G4","G5"), gamePlayer3);
             ships.save(ship11);
             Ship ship12 = new Ship ("Battleship", Arrays.asList("A10","B10","C10","D10"), gamePlayer3);
             ships.save(ship12);
-            Ship ship23 = new Ship ("Patrol Boat", Arrays.asList("A5", "B5"), gamePlayer3);
+            Ship ship23 = new Ship ("Patrol-Boat", Arrays.asList("A5", "B5"), gamePlayer3);
             ships.save(ship23);
 
             Ship ship13 = new Ship ("Submarine", Arrays.asList("D1","E1","F1"), gamePlayer4);
@@ -109,20 +109,20 @@ public class SalvoApplication {
             ships.save(ship14);
             Ship ship15 = new Ship ("Battleship", Arrays.asList("A1","A2","A3","A4"), gamePlayer4);
             ships.save(ship15);
-            Ship ship16 = new Ship ("Aircraft Carrier", Arrays.asList("I6","I7","I8","I9","I10"), gamePlayer4);
+            Ship ship16 = new Ship ("Aircraft-Carrier", Arrays.asList("I6","I7","I8","I9","I10"), gamePlayer4);
             ships.save(ship16);
-            Ship ship24 = new Ship ("Patrol Boat", Arrays.asList("C1", "C2"), gamePlayer4);
+            Ship ship24 = new Ship ("Patrol-Boat", Arrays.asList("C1", "C2"), gamePlayer4);
             ships.save(ship24);
 
             Ship ship17 = new Ship ("Destroyer", Arrays.asList("I7","I8","I9"), gamePlayer5);
             ships.save(ship17);
             Ship ship18 = new Ship ("Submarine", Arrays.asList("F8","F9","F10"), gamePlayer5);
             ships.save(ship18);
-            Ship ship19 = new Ship ("Aircraft Carrier", Arrays.asList("A1","B1","C1","D1","E1"), gamePlayer5);
+            Ship ship19 = new Ship ("Aircraft-Carrier", Arrays.asList("A1","B1","C1","D1","E1"), gamePlayer5);
             ships.save(ship19);
             Ship ship20 = new Ship ("Battleship", Arrays.asList("A7","A8","A9","A10"), gamePlayer5);
             ships.save(ship20);
-            Ship ship25 = new Ship ("Patrol Boat", Arrays.asList("J9", "J10"), gamePlayer5);
+            Ship ship25 = new Ship ("Patrol-Boat", Arrays.asList("J9", "J10"), gamePlayer5);
             ships.save(ship25);
 
             //Salvoes creados y guardados en la base de datos (para cada GamePlayer x turno)

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Current Game</title>
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
     <link rel="stylesheet" href="styles/game_view.css">
 
@@ -13,101 +14,150 @@
 
 <body>
 
-<div class="container" id="app">
+    <div class="container" id="app">
 
-    <div class="row">
-        <h3>GAME INFORMATION:</h3>
-        <span>{{me ? me.userName  : "" }} (YOU)</span>
-        <span>VS</span>
-        <span>{{otherPlayer ? otherPlayer.userName  : ""}}</span>
-    </div>
+        <div class="row">
+            <h3>GAME INFORMATION:</h3>
+            <span>{{me ? me.userName  : "" }} (YOU)</span>
+            <span>VS</span>
+            <span>{{otherPlayer ? otherPlayer.userName  : ""}}</span>
+        </div>
 
 
 
-    <div class="row">
+        <div class="row">
 
-        <div class="col-5" id="game-grid">
-            <h3>Game Grid</h3>
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th v-for="number in numbers">{{number}}</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="letter in letters">
-                    <td>{{letter}}</td>
-                    <td v-bind:id="letter+number" v-for="number in 10" v-on:click="addShips(letter+number)">{{ }}</td>
-                </tr>
-                </tbody>
-            </table>
+            <div class="col-5" id="game-grid">
+                <h3>Game Grid</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th v-for="number in numbers">{{number}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="letter in letters">
+                            <td><b>{{letter}}</b></td>
+                            <td v-bind:id="letter+number" v-for="number in 10" v-on:click="addShips(letter+number)">
+                                {{ }}</td>
+                        </tr>
+                    </tbody>
+                </table>
 
-            <div id="add-ships" v-show="ships.length == 0"> 
-                <div>
-                    Choose ships
-                    <select id="ships" v-model:value="shipType">
-                        <option value="aircraft" selected>Aircraft Carrier</option>
-                        <option value="battleship">Battleship</option>
-                        <option value="destroyer">Destroyer</option>
-                        <option value="submarine">Submarine</option>
-                        <option value="patrol">Patrol Boat</option>
-                    </select>
-                    Orientation
-                    <label><input type="radio" name="orientation" value="vertical" v-model="shipOrientation" checked>Vertical</label>
-                    <label><input type="radio" name="orientation" value="horizontal" v-model="shipOrientation">Horizontal</label>
+                <div id="add-ships" v-show="ships.length == 0">
+                    <div>
+                        Choose ships
+                        <select id="ships" v-model:value="shipType">
+                            <option value="aircraft" selected>Aircraft Carrier</option>
+                            <option value="battleship">Battleship</option>
+                            <option value="destroyer">Destroyer</option>
+                            <option value="submarine">Submarine</option>
+                            <option value="patrol">Patrol Boat</option>
+                        </select>
+                        Orientation
+                        <label><input type="radio" name="orientation" value="vertical" v-model="shipOrientation"
+                                checked>Vertical</label>
+                        <label><input type="radio" name="orientation" value="horizontal"
+                                v-model="shipOrientation">Horizontal</label>
+                    </div>
+                    <div>
+                        <button v-on:click="sendShips()">SEND</button>
+                    </div>
                 </div>
-                <div>
-                    <button v-on:click="sendShips()">SEND</button>
+
+            </div>
+
+            <div class="col-5" id="salvoes-grid">
+                <h3>Your Salvoes</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th v-for="num in numbers">{{num}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="let in letters">
+                            <td><b>{{let}}</b></td>
+                            <td v-bind:id="let+num + 'S'" v-for="num in 10" v-on:click="selectTdToFire(let+num + 'S')">
+                                {{ }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div id="add-salvo" class="col-5">
+                    <button v-on:click="sendSalva()">FIRE!</button>
                 </div>
+
             </div>
 
         </div>
 
-        <div class="col-5" id="salvoes-grid">
-            <h3>Your Salvoes</h3>
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th v-for="num in numbers">{{num}}</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="let in letters">
-                    <td>{{let}}</td>
-                    <td v-bind:id="let+num + 'S'" v-for="num in 10" v-on:click="selectTdToFire(let+num + 'S')">{{ }}</td>
-                </tr>
-                </tbody>
-            </table>
+        <div id="tables" class="row d-none">
 
-            <div id="add-salvo" class="col-5">
-                <button v-on:click="sendSalva()">FIRE!</button>
+            <div class="col-4"> 
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Turn</th>
+                            <th colspan="2">Hits on You</th>
+                        </tr>
+                        <tr>
+                            <th>Hits</th>
+                            <th>Sunken Ships</th> 
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="salvo in salvoes" v-if="salvo.hits.length >= 1 && app.me.id != salvo.playerID">
+                            <td>{{salvo.turnNumber}}</td>
+                            <td>{{salvo.hits.length}}</td> 
+                            <td>{{salvo.sunken.length}}<template v-for="sunk in salvo.sunken">{{sunk.type}}</template></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-4">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Turn</th>
+                            <th colspan="3">Hits on Opponent</th>
+                        </tr>
+                        <tr>
+                            <th>Hits</th> 
+                            <th>Sunken Ships</th>
+                            <th>Type</th> 
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="salvo in salvoes" v-if="salvo.hits.length >= 1 && app.me.id == salvo.playerID">
+                            <td>{{salvo.turnNumber}}</td>
+                            <td>{{salvo.hits.length}}</td> 
+                            <td>{{salvo.sunken.length}}</td>
+                            <td><template v-for="sunk in salvo.sunken">{{sunk.type}} / </template></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
         </div>
-        
-    </div>
-
-    <div class="row">
-
 
     </div>
 
-</div>
 
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://code.jquery.com/jquery-3.5.0.min.js"
+        integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous">
+    </script>
 
-<script src="https://code.jquery.com/jquery-3.5.0.min.js"
-        integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ="
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-        crossorigin="anonymous"></script>
-
-<script src="scripts/game_view.js"></script>
+    <script src="scripts/game_view.js"></script>
 
 </body>
+
 </html>

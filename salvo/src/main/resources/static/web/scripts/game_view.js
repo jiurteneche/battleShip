@@ -14,6 +14,8 @@ var app = new Vue({
         shipOrientation: "vertical",
         gamePlayerId: null,
         tdsSelectedToFire: [],
+
+
     },
     methods: {
         paintShips() {
@@ -164,11 +166,11 @@ var app = new Vue({
 
                     var free = true;
 
-                    if(horizontalEnd - number < totalCells - 1) {
+                    if (horizontalEnd - number < totalCells - 1) {
 
                         alert("You cannot place a ship out of range");
 
-                    } else { 
+                    } else {
 
                         for (let i = 0; i < totalCells - 1; i++) {
 
@@ -213,62 +215,102 @@ var app = new Vue({
                 alert("You cannot place the same ship twice!")
             }
         },
-        sendShips(){
+        sendShips() {
 
             if (this.placedShips.length < 5) {
                 alert("You must place all ships")
             } else {
                 $.post({
-                    url: "/api/games/players/" + app.gamePlayerId + "/ships",
-                    data: JSON.stringify(this.placedShips),
-                    dataType: "text",
-                    contentType: "application/json"
-                })
-                .done(function (response, status, jqXHR) {
-                    alert("Ships added successfully");
-                    document.getElementById("add-ships").classList.add("d-none");
-                    location.reload(true);
-                })
-                .fail(function (jqXHR, status, httpError) {
-                    alert("Failed to add ships: " + textStatus + " " + httpError);
-                })
-            }           
+                        url: "/api/games/players/" + app.gamePlayerId + "/ships",
+                        data: JSON.stringify(this.placedShips),
+                        dataType: "text",
+                        contentType: "application/json"
+                    })
+                    .done(function (response, status, jqXHR) {
+                        alert("Ships added successfully");
+                        document.getElementById("add-ships").classList.add("d-none");
+                        location.reload(true);
+                    })
+                    .fail(function (jqXHR, status, httpError) {
+                        alert("Failed to add ships: " + textStatus + " " + httpError);
+                    })
+            }
         },
+        selectTdToFire(cell) {
 
+            var letter = cell[0];
+            var number = "";
 
+            if (cell.length == 3) {
+                number = cell.slice(1, 2);
+            } else {
+                number = cell.slice(1, 3);
+            }
 
-        selectTdToFire(cell){
+            var salvoesFired = [];
 
-            if (this.tdsSelectedToFire.length >= this.ships.length){
-                alert("You cannot fire more than five salvoes!")
+            this.salvoes.forEach(salvo => {
+                salvo.salvoLocations.forEach(location => {
+                    if (salvo.playerID == this.me.id) {
+                        salvoesFired.push(location);
+                    }
+                })
+            })
+
+            if (this.tdsSelectedToFire.length >= this.ships.length) {
+                alert("You cannot fire more salvoes!")
+            } else if (salvoesFired.includes(letter + number) || this.tdsSelectedToFire.includes(letter + number)) {
+                alert("You cannot fire the same position twice!")
             } else {
 
-                this.tdsSelectedToFire.push(cell);
+                this.tdsSelectedToFire.push(letter + number);
 
                 document.getElementById(cell).style.backgroundColor = "#FF3333";
 
             }
-            
-        },
 
-        sendSalva(){
+        },
+        sendSalva() {
 
             $.post({
-                url: "/api/games/players/" + app.gamePlayerId + "/salvoes",
-                data: JSON.stringify(this.tdsSelectedToFire),
-                dataType: "text",
-                contentType: "application/json"
-            })
-            .done(function (response, status, jqXHR) {
-                alert("Salva fire successfully");
-            })
-            .fail(function (jqXHR, status, httpError) {
-                alert("Failed to fire salva: " + textStatus + " " + httpError);
-            })
+                    url: "/api/games/players/" + app.gamePlayerId + "/salvoes",
+                    data: JSON.stringify(this.tdsSelectedToFire),
+                    dataType: "text",
+                    contentType: "application/json"
+                })
+                .done(function (response, status, jqXHR) {
+                    alert("Salva fire successfully");
+                    location.reload(true);
+                })
+                .fail(function (jqXHR, status, httpError) {
+                    alert("Failed to fire salva: " + textStatus + " " + httpError);
+                })
 
         },
+        salvoesOrdered() {
 
+            this.salvoes.sort(function (a, b) {
+                if (a.turnNumber > b.turnNumber) {
+                    return -1;
+                }
+                if (a.turnNumber < b.turnNumber) {
+                    return 1;
+                }
+                return 0;
+            })
+        },
+        //ESTA FUNCIÓN TIRA ERROR EN LA CONSOLA HASTA QUE SE DA EL PRIMER IMPACTO A ALGÚN BARCO, ESTÁ OK IGUAL
+        changeClassForTables(){
 
+            this.salvoes.forEach(salvo => {
+                if (salvo.hits.length == 0){
+                    console.log(this.salvoes);
+                } else {
+                    document.getElementById("tables").classList.remove("d-none");
+                }
+            })
+
+        }
     },
 })
 
@@ -290,6 +332,8 @@ fetch("/api/game_view/" + app.gamePlayerId)
         app.paintShips();
         app.printGameInfo();
         app.paintMySalvoesWithTurn();
+        app.salvoesOrdered();
+        app.changeClassForTables();
     })
 
 
