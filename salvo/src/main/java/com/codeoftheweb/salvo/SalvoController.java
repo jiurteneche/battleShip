@@ -175,6 +175,8 @@ public class SalvoController {
                 response = new ResponseEntity<>(makeMap("Error", "This is not your game"), HttpStatus.UNAUTHORIZED);
             }else if(shots.size() != 5){
                 response = new ResponseEntity<>(makeMap("Error", "Wrong number of shots"), HttpStatus.FORBIDDEN);
+            }else if(gamePlayer.getState() != GameState.fire_salva){
+                response = new ResponseEntity<>(makeMap("Error", "You must wait your turn"), HttpStatus.FORBIDDEN);
             }else{
                 int turn = gamePlayer.getSalvoes().size() + 1;
 
@@ -333,6 +335,7 @@ public class SalvoController {
             dto.put("gamePlayer", gamePlayer.getGame().getGamePlayers().stream().map(gp -> makeGamePlayerDTO(gp)).collect(toList()));
             dto.put("ships", gamePlayer.getShips().stream().map(this::makeShipDTO));
             dto.put("salvoes", gamePlayer.getGame().getGamePlayers().stream().flatMap(gp -> gp.getSalvoes().stream().map(this::makeSalvoDTO)));
+            dto.put("gameState", gamePlayer.getState());
 
             return dto;
         }
@@ -353,22 +356,9 @@ public class SalvoController {
             dto.put("salvoLocations", salvo.getSalvoLocations());
             dto.put("playerID", salvo.getGamePlayer().getPlayer().getId());
 
-            GamePlayer opponent = salvo.getGamePlayer().getOpponent();
-
-            if(opponent != null){
-
-                Set<Ship> enemyShips = opponent.getShips();
-
-                dto.put("hits", salvo.getHits(salvo.getSalvoLocations(), enemyShips));
-
-                Set<Salvo> mySalvoes = salvo.getGamePlayer()
-                                            .getSalvoes()
-                                            .stream()
-                                            .filter(sal -> sal.getTurnNumber() <= salvo.getTurnNumber())
-                                            .collect(Collectors.toSet());
-
-                dto.put("sunken", salvo.getSunkenShips(mySalvoes, enemyShips).stream().map(ship -> this.makeShipDTO(ship)));
-
+            if(salvo.getGamePlayer().getOpponent() != null){
+                dto.put("hits", salvo.getHits());
+                dto.put("sunken", salvo.getSunkenShips().stream().map(ship -> this.makeShipDTO(ship)));
             } else {
                 dto.put("hits", new ArrayList<>());
                 dto.put("sunken", new ArrayList<>());

@@ -23,53 +23,78 @@ public class Salvo {
     private List<String> salvoLocations = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="gamePlayer_id")
+    @JoinColumn(name = "gamePlayer_id")
     private GamePlayer gamePlayer;
 
-    public Salvo() {}
+    public Salvo() {
+    }
 
-    public Salvo(int turnNumber, List<String> salvoLocations, GamePlayer gamePlayer){
+    public Salvo(int turnNumber, List<String> salvoLocations, GamePlayer gamePlayer) {
         this.turnNumber = turnNumber;
         this.salvoLocations = salvoLocations;
         this.gamePlayer = gamePlayer;
     }
 
-    public long getId() { return id; }
+    public long getId() {
+        return id;
+    }
 
-    public int getTurnNumber() { return turnNumber; }
-    public void setTurnNumber(int turnNumber) { this.turnNumber = turnNumber; }
+    public int getTurnNumber() {
+        return turnNumber;
+    }
 
-    public List<String> getSalvoLocations() { return salvoLocations; }
-    public void setSalvoLocations(List<String> salvoLocations) { this.salvoLocations = salvoLocations; }
+    public void setTurnNumber(int turnNumber) {
+        this.turnNumber = turnNumber;
+    }
 
-    public GamePlayer getGamePlayer() { return gamePlayer; }
-    public void setGamePlayer(GamePlayer gamePlayer) { this.gamePlayer = gamePlayer; }
+    public List<String> getSalvoLocations() {
+        return salvoLocations;
+    }
 
-    public List<String> getHits(List<String> myShots, Set<Ship> opponentShips){
+    public void setSalvoLocations(List<String> salvoLocations) {
+        this.salvoLocations = salvoLocations;
+    }
 
+    public GamePlayer getGamePlayer() {
+        return gamePlayer;
+    }
+
+    public void setGamePlayer(GamePlayer gamePlayer) {
+        this.gamePlayer = gamePlayer;
+    }
+
+    public List<String> getHits() {
+
+        Set<Ship> opponentShips = this.gamePlayer.getOpponent().getShips();
         List<String> allEnemyLocations = new ArrayList<>();
 
-        opponentShips.forEach( ship -> allEnemyLocations.addAll(ship.getShipPositions()));
+        opponentShips.forEach(ship -> allEnemyLocations.addAll(ship.getShipPositions()));
 
-        return myShots
+        return this.salvoLocations
                 .stream()
-                    .filter(shot -> allEnemyLocations
-                            .stream()
-                                .anyMatch(location -> location.equals(shot)))
-                                    .collect(Collectors.toList());
+                .filter(shot -> allEnemyLocations
+                        .stream()
+                        .anyMatch(location -> location.equals(shot)))
+                .collect(Collectors.toList());
 
     }
 
-    public List<Ship> getSunkenShips(Set<Salvo> mySalvoes, Set<Ship> opponentShips){
+    public List<Ship> getSunkenShips() {
 
         List<String> allShots = new ArrayList<>();
+        Set<Ship> opponentShips = this.gamePlayer.getOpponent().getShips();
+        Set<Salvo> mySalvoes = this.getGamePlayer()
+                .getSalvoes()
+                .stream()
+                .filter(sal -> sal.getTurnNumber() <= this.turnNumber)
+                .collect(Collectors.toSet());
 
         mySalvoes.forEach(salvo -> allShots.addAll(salvo.getSalvoLocations()));
 
         return opponentShips
                 .stream()
-                    .filter(ship -> allShots.containsAll(ship.getShipPositions()))
-                        .collect(Collectors.toList());
+                .filter(ship -> allShots.containsAll(ship.getShipPositions()))
+                .collect(Collectors.toList());
 
     }
 

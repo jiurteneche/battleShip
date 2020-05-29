@@ -27,7 +27,7 @@ public class SalvoApplication {
                                       ShipRepository ships, SalvoRepository salvoes, ScoreRepository scores) {
         return (args) -> {
 
-        	//Jugadores creados y guardados en la base de datos
+        /*	//Jugadores creados y guardados en la base de datos
             Player player1 = new Player("Jack", "Bauer", "j.bauer@ctu.gov", passwordEncoder().encode("Jack123"));
             players.save(player1);
 
@@ -42,9 +42,9 @@ public class SalvoApplication {
 
 			//PLAYER MÍO QUE QUIERO QUE SEA ADMIN
             Player player5 = new Player("Juan", "Urteneche", "jiurteneche@gmail.com", passwordEncoder().encode("mindhub123"));
-            players.save(player5);
+            players.save(player5);      */
 
-			//Juegos creados y guardados en la base de datos
+		/*	//Juegos creados y guardados en la base de datos
             Game game1 = new Game();
 			games.save(game1);
 
@@ -160,7 +160,7 @@ public class SalvoApplication {
             scores.save(score4);
 
             Score score5 = new Score(LocalDateTime.now(), 1, game3, player1);
-            scores.save(score5);
+            scores.save(score5);    */
         };
     }
 }
