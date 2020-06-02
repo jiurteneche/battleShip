@@ -111,11 +111,9 @@ public class GamePlayer {
              gameState = GameState.wait_opponent_salva;
          } else if (salvoes.size() == getOpponent().getSalvoes().size()) {
 
-             Salvo lastSalvo = salvoes.stream().sorted(Comparator.comparing(Salvo::getTurnNumber).reversed()).findFirst().orElse(null);
-             Salvo lastSalvoOpponent = getOpponent().getSalvoes().stream().sorted(Comparator.comparing(Salvo::getTurnNumber).reversed()).findFirst().orElse(null);
+             int gamePlayerSunken = getGamePlayerSunken();
 
-             int gamePlayerSunken = lastSalvo != null ? lastSalvo.getSunkenShips().size() : 0;
-             int opponentSunken = lastSalvoOpponent != null ? lastSalvoOpponent.getSunkenShips().size() : 0;
+             int opponentSunken = getOpponentSunken();
 
              if (gamePlayerSunken == 5 && opponentSunken < 5) {
                  gameState = GameState.win;
@@ -128,6 +126,16 @@ public class GamePlayer {
          }
 
          return gameState;
+    }
+
+    public int getOpponentSunken() {
+        Salvo lastSalvoOpponent = getOpponent().getSalvoes().stream().sorted(Comparator.comparing(Salvo::getTurnNumber).reversed()).findFirst().orElse(null);
+        return lastSalvoOpponent != null ? lastSalvoOpponent.getSunkenShips().size() : 0;
+    }
+
+    public int getGamePlayerSunken() {
+        Salvo lastSalvo = this.salvoes.stream().sorted(Comparator.comparing(Salvo::getTurnNumber).reversed()).findFirst().orElse(null);
+        return lastSalvo != null ? lastSalvo.getSunkenShips().size() : 0;
     }
 
 }

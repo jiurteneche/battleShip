@@ -14,8 +14,9 @@ var app = new Vue({
         shipOrientation: "vertical",
         gamePlayerId: null,
         tdsSelectedToFire: [],
-
-
+        mySunkenShips: 0,
+        //Acá tengo los salvoes del oponente ordenados por turnNumber. El primero del array[0] es siempre el último disparo, es decir, el que tiene el turnNumber más alto
+        opponentSalvoes: [],
     },
     methods: {
         paintShips() {
@@ -257,7 +258,7 @@ var app = new Vue({
                 })
             })
 
-            if (this.tdsSelectedToFire.length >= this.ships.length) {
+            if (this.tdsSelectedToFire.length >= (5 - this.mySunkenShips)) {
                 alert("You cannot fire more salvoes!")
             } else if (salvoesFired.includes(letter + number) || this.tdsSelectedToFire.includes(letter + number)) {
                 alert("You cannot fire the same position twice!")
@@ -299,24 +300,41 @@ var app = new Vue({
                 return 0;
             })
         },
-        //ESTA FUNCIÓN TIRA ERROR EN LA CONSOLA HASTA QUE SE DA EL PRIMER IMPACTO A ALGÚN BARCO, ESTÁ OK IGUAL
-        changeClassForTables(){
+        changeClassForTables() {
 
             this.salvoes.forEach(salvo => {
-                if (salvo.hits.length == 0){
+                if (salvo.hits.length == 0) {
                     console.log(this.salvoes);
                 } else {
                     document.getElementById("tables").classList.remove("d-none");
                 }
             })
 
-        }
+        },
+        calculateMySunkenShips() {
+
+            if (this.salvoes.length != 0){
+
+                for (let i=0; i<this.salvoes.length; i++){
+
+                    if(this.salvoes[i].playerID != this.me.id){
+    
+                        this.opponentSalvoes.push(this.salvoes[i]);
+    
+                    }
+    
+                }
+
+            }
+            
+            this.mySunkenShips = this.opponentSalvoes[0].sunken.length;
+
+        },
     },
 })
 
 
 app.gamePlayerId = paramObj(location.search).gp;
-
 
 fetch("/api/game_view/" + app.gamePlayerId)
     .then((Response) => {
@@ -334,6 +352,7 @@ fetch("/api/game_view/" + app.gamePlayerId)
         app.paintMySalvoesWithTurn();
         app.salvoesOrdered();
         app.changeClassForTables();
+        app.calculateMySunkenShips();
     })
 
 
@@ -346,3 +365,31 @@ function paramObj(search) {
     });
     return obj;
 }
+
+
+
+var timerId;
+
+function startTimer(){
+
+    timerId = setInterval(() => {
+        console.log("Juan capo"); 
+        fetch("/api/game_view/" + app.gamePlayerId); 
+        stopTimer(timerId);
+    }, 50000);  
+
+}
+startTimer();
+
+function stopTimer(timerId){
+
+    app.salvoes.forEach(salvo => {
+
+        if(salvo.sunken.length == 5){
+
+            clearInterval(timerId);
+
+        }
+    })
+}
+     

@@ -85,7 +85,7 @@
                 </table>
 
                 <div id="add-salvo" class="col-5">
-                    <button v-on:click="sendSalva()">FIRE!</button>
+                    <button v-on:click="sendSalva()" v-show="jsonComplete.gameState != 'wait_opponent_salva'">FIRE!</button>
                 </div>
 
             </div>
@@ -110,7 +110,7 @@
                         <tr v-for="salvo in salvoes" v-if="salvo.hits.length >= 1 && app.me.id != salvo.playerID">
                             <td>{{salvo.turnNumber}}</td>
                             <td>{{salvo.hits.length}}</td> 
-                            <td>{{salvo.sunken.length}}<template v-for="sunk in salvo.sunken">{{sunk.type}}</template></td>
+                            <td><template v-for="sunk in salvo.sunken">{{sunk.type}} / </template></td>
                         </tr>
                     </tbody>
                 </table>

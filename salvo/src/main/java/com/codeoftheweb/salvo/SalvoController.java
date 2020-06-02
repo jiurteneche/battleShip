@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,9 @@ public class SalvoController {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    ScoreRepository scoreRepository;
 
     @GetMapping("/games")
     public Map<String, Object> getGames(Authentication authentication) {
@@ -173,11 +177,13 @@ public class SalvoController {
                 response = new ResponseEntity<>(makeMap("Error", "No such game"), HttpStatus.NOT_FOUND);
             }else if(gamePlayer.getPlayer().getId() != player.getId()) {
                 response = new ResponseEntity<>(makeMap("Error", "This is not your game"), HttpStatus.UNAUTHORIZED);
-            }else if(shots.size() != 5){
+            }else if(shots.size() != (5 - gamePlayer.getOpponentSunken())){
+                System.out.println(gamePlayer.getOpponentSunken());
                 response = new ResponseEntity<>(makeMap("Error", "Wrong number of shots"), HttpStatus.FORBIDDEN);
             }else if(gamePlayer.getState() != GameState.fire_salva){
                 response = new ResponseEntity<>(makeMap("Error", "You must wait your turn"), HttpStatus.FORBIDDEN);
             }else{
+
                 int turn = gamePlayer.getSalvoes().size() + 1;
 
                 Salvo salvo = new Salvo(turn, shots, gamePlayer);
@@ -186,6 +192,25 @@ public class SalvoController {
                 gamePlayerRepository.save(gamePlayer);
 
                 response = new ResponseEntity<>(makeMap("Success", "Salvo added"), HttpStatus.CREATED);
+
+                if(turn == gamePlayer.getOpponent().getSalvoes().size()){
+                    if(gamePlayer.getState() == GameState.win){
+                        Score score = new Score(LocalDateTime.now(), 1.0, gamePlayer.getGame(), gamePlayer.getPlayer());
+                        scoreRepository.save(score);
+                        Score scoreOpponent = new Score(LocalDateTime.now(), 0.0, gamePlayer.getOpponent().getGame(), gamePlayer.getOpponent().getPlayer());
+                        scoreRepository.save(scoreOpponent);
+                    } else if (gamePlayer.getState() == GameState.lose){
+                        Score score = new Score(LocalDateTime.now(), 0.0, gamePlayer.getGame(), gamePlayer.getPlayer());
+                        scoreRepository.save(score);
+                        Score scoreOpponent = new Score(LocalDateTime.now(), 1.0, gamePlayer.getOpponent().getGame(), gamePlayer.getOpponent().getPlayer());
+                        scoreRepository.save(scoreOpponent);
+                    } else {
+                        Score score = new Score(LocalDateTime.now(), 0.5, gamePlayer.getGame(), gamePlayer.getPlayer());
+                        scoreRepository.save(score);
+                        Score scoreOpponent = new Score(LocalDateTime.now(), 0.5, gamePlayer.getOpponent().getGame(), gamePlayer.getOpponent().getPlayer());
+                        scoreRepository.save(scoreOpponent);
+                    }
+                }
             }
         }
         return response;
